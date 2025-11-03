@@ -41,6 +41,7 @@ HWND hLabel = NULL;
 HWND hLabelDateTime = NULL;
 HWND hwnd = NULL;
 
+BOOL is64Bit();
 void SetAlwaysOnTop(HWND hwnd, BOOL enable);
 
 BOOL isTopMost = FALSE;
@@ -201,9 +202,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             break;
         case IDM_HELP_ABOUT:
-            MessageBox(hwnd, L"MyApp v1.0 (x64) per Windows 10 e Windows 11\n\nRealizzato da Alessandro Favretto.\n\n\nApplicazione standalone realizzata in VC++ e WinAPI.",
-                L"Informazioni su MyApp\n",
-                MB_OK | MB_ICONINFORMATION);
+            if(is64Bit())
+                MessageBox(hwnd, L"MyApp v1.0 (x64) per Windows 10 e Windows 11\n\nRealizzato da Alessandro Favretto.\n\n\nApplicazione standalone realizzata in VC++ e WinAPI.",
+                    L"Informazioni su MyApp\n",
+                    MB_OK | MB_ICONINFORMATION);
+            else
+                MessageBox(hwnd, L"MyApp v1.0 (x86) per Windows 10 e Windows 11\n\nRealizzato da Alessandro Favretto.\n\n\nApplicazione standalone realizzata in VC++ e WinAPI.",
+                    L"Informazioni su MyApp\n",
+                    MB_OK | MB_ICONINFORMATION);
             break;
         case IDM_OPEN_GUI:
             ShowWindow(hwnd, SW_SHOW);          // ripristina la finestra
@@ -294,6 +300,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+BOOL is64Bit() {
+#if defined(_WIN64)
+    return TRUE;  // Processo a 64 bit
+#else
+    return FALSE; // Processo a 32 bit
+#endif
+}
+
 void SetAlwaysOnTop(HWND hwnd, BOOL enable)
 {
     SetWindowPos(
@@ -358,26 +372,50 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     int y = (screenHeight - 480) / 2;
 
     isAppRunningAsAdmin = IsRunningAsAdmin();
-    if(isAppRunningAsAdmin)
-        hwnd = CreateWindowEx(
-            0,
-            L"MiniLauncher",
-            L"MyApp v.1.0 (x64) - {Administrator}",
-            WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-            x, y,
-            640, 480,
-            NULL, NULL, hInstance, NULL
-        );
-    else
-        hwnd = CreateWindowEx(
-            0,
-            L"MiniLauncher",
-            L"MyApp v.1.0 (x64)",
-            WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-            x, y,
-            640, 480,
-            NULL, NULL, hInstance, NULL
-        );
+
+    if (is64Bit()) {
+        if (isAppRunningAsAdmin)
+            hwnd = CreateWindowEx(
+                0,
+                L"MiniLauncher",
+                L"MyApp v1.0 (x64) - {Administrator}",
+                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+                x, y,
+                640, 480,
+                NULL, NULL, hInstance, NULL
+            );
+        else
+            hwnd = CreateWindowEx(
+                0,
+                L"MiniLauncher",
+                L"MyApp v1.0 (x64)",
+                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+                x, y,
+                640, 480,
+                NULL, NULL, hInstance, NULL
+            );
+    } else {
+        if (isAppRunningAsAdmin)
+            hwnd = CreateWindowEx(
+                0,
+                L"MiniLauncher",
+                L"MyApp v1.0 (x86) - {Administrator}",
+                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+                x, y,
+                640, 480,
+                NULL, NULL, hInstance, NULL
+            );
+        else
+            hwnd = CreateWindowEx(
+                0,
+                L"MiniLauncher",
+                L"MyApp v1.0 (x86)",
+                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+                x, y,
+                640, 480,
+                NULL, NULL, hInstance, NULL
+            );
+    }
 
     // Aggiunto: inizializzazione struttura tray icon
     nid.cbSize = sizeof(NOTIFYICONDATA);
